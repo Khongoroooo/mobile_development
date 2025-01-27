@@ -2,17 +2,35 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Button } from 'react-native';
 
 export default function App() {
-  const [seconds, setSeconds] = useState(0); // Хугацааг хадгалах
-  const [isRunning, setIsRunning] = useState(false); // Таймер ажиллаж байгаа эсэхийг хадгалах
+  const [seconds, setSeconds] = useState(0);  // Секунд
+  const [milliseconds, setMilliseconds] = useState(0);  // Миллисекунд
+  const [isRunning, setIsRunning] = useState(false);  // Таймер ажиллаж байгаа эсэх
+
+  // Секундыг цаг, минут, секунд, миллисекунд болгон хөрвүүлэх
+  const formatTime = (seconds, milliseconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    return `${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}:${milliseconds < 10 ? '0' : milliseconds < 10 ? '0' : ''}${milliseconds}`;
+  };
 
   // Таймерын ажиллагаа
   useEffect(() => {
     let interval;
-
+    
     if (isRunning) {
       interval = setInterval(() => {
-        setSeconds((prevSeconds) => prevSeconds + 1);
-      }, 1000);
+        setMilliseconds((prevMilliseconds) => {
+          if (prevMilliseconds === 100) {
+            setSeconds((prevSeconds) => prevSeconds + 1);
+            return 0;
+          } else {
+            return prevMilliseconds + 1;
+          }
+        });
+      }, 1);  // Миллисекунд нэмэхэд 1 мс-ийн интервал
+
     } else {
       clearInterval(interval); // Таймер зогссон үед зогсоох
     }
@@ -26,14 +44,15 @@ export default function App() {
   };
 
   const handleReset = () => {
-    setIsRunning(false); // Таймер зогсоох
-    setSeconds(0); // Хугацааг дахин 0 болгох
+    setIsRunning(false);  // Таймер зогсоох
+    setSeconds(0);  // Хугацааг дахин 0 болгох
+    setMilliseconds(0);  // Миллисекундийг дахин 0 болгох
   };
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text style={{ fontSize: 50, marginBottom: 20 }}>
-        {seconds}s
+        {formatTime(seconds, milliseconds)}
       </Text>
       <Button 
         title={isRunning ? "Stop" : "Start"} 
